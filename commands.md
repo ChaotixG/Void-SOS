@@ -62,7 +62,8 @@ does, from the server's own screen and keyboard.
 | Command | What it does |
 |---|---|
 | `sudo void-sos setup` | Set the server up, once: you become its owner, it gets its name on your tailnet and joins it, and it makes the backup recovery key (24 words to write down; you type three back). It ends with a QR code to pair your phone |
-| `sudo void-sos pair` | A new QR code that pairs one more of your devices. It works once, for 15 minutes. A computer without a camera types the server's name and the code shown under it |
+| `sudo void-sos pair` | A QR code anyone can scan to ask to join. They choose a name and username; you approve them in the app's Approvals, and they join without admin rights. It works once, for 24 hours. Without a camera, they type the server's name in the app and request an account. Their phone reaches the server through Tailscale: share the server with them in Tailscale's admin console, or invite them to your tailnet |
+| `sudo void-sos pair --owner` | A new QR code that pairs one more of your own devices. It works once, for 15 minutes. A computer without a camera types the server's name and the code shown under it |
 | `void-sos status` | The server's name and version, whether it is set up, the four words of its key, and its tailnet |
 | `void-sos approvals` | What is waiting for a decision: account requests, new devices, USB devices plugged in |
 | `sudo void-sos approve <id> [--always]` | Approve one of them. A new account gets the member role. For a USB device, `--always` remembers it, so it is let in whenever it is plugged in |
@@ -78,6 +79,7 @@ does, from the server's own screen and keyboard.
 | `sudo void-sos lift <id>` | Lift a suspension or blacklist |
 | `sudo void-sos delete <user>` | Delete an account and all of its devices, after asking you to confirm |
 | `void-sos updates` | The two system slots, which one runs, and whether a new release is waiting |
+| `sudo void-sos update` | Checks for a new release and, once you confirm, installs it and restarts into it. Your apps, files and settings are not touched; a release that does not start is undone by itself |
 | `void-sos activity [n]` | The last entries of the audit log, and a warning if it was ever altered |
 | `sudo void-sos terminal enable` | Turn the remote terminal on. It is turned off from the app |
 | `sudo void-sos tailscale` | Sign the server in to your tailnet: it shows a QR code to scan with your phone, and waits until you have signed in. Setup does this as one of its steps; this is for later, after a skip, or when the server shows as not signed in |

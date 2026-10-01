@@ -42,3 +42,9 @@ Where a copyleft component is patched, the patch is part of the corresponding
 source and is supplied with it. Void SOS ships upstream releases unmodified
 wherever possible; build configuration is recorded in the build definitions
 supplied under the offer above.
+
+Patched in this release:
+
+| Component | Change | Files |
+|---|---|---|
+| Kanidm 1.11.2 (MPL-2.0) | A password used alone needs 10 characters instead of 15, and zxcvbn's score 3 ("safely unguessable") instead of 4 | `libs/crypto/src/lib.rs` (`PW_SFA_MIN_LENGTH_NIST`), `server/lib/src/idm/credupdatesession.rs` (the score check) |
