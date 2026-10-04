@@ -1,0 +1,41 @@
+# The public repo's .github/workflows/aemu-postoffice.yml: builds the PSP ad
+# hoc server's image from images/aemu-postoffice, checks that it starts and
+# answers on its ports, and publishes it to ghcr.io/chaotixg/aemu-postoffice.
+# The digest it prints is what RomM's catalogue entry pins.
+name: aemu-postoffice image
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['images/aemu-postoffice/**', '.github/workflows/aemu-postoffice.yml']
+permissions:
+  contents: read
+  packages: write
+env:
+  IMAGE: ghcr.io/chaotixg/aemu-postoffice:2026-09-06-hotfix_1
+jobs:
+  image:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Build
+        run: docker build --pull -t "$IMAGE" images/aemu-postoffice
+      - name: Starts, read-only, and answers on both ports
+        run: |
+          docker run -d --name t --read-only --cap-drop ALL \
+            -p 127.0.0.1:27312:27312 -p 127.0.0.1:27313:27313 "$IMAGE"
+          for i in $(seq 20); do
+            (exec 3<>/dev/tcp/127.0.0.1/27312 && exec 4<>/dev/tcp/127.0.0.1/27313) 2>/dev/null && break
+            sleep 1
+          done
+          docker logs t
+          exec 3<>/dev/tcp/127.0.0.1/27312 && exec 4<>/dev/tcp/127.0.0.1/27313
+          test "$(docker inspect -f '{{.State.Running}}' t)" = true
+          docker rm -f t
+      - name: Publish
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+          docker push "$IMAGE"
+          d=$(docker inspect -f '{{index .RepoDigests 0}}' "$IMAGE")
+          echo "$d"
+          echo "Published \`${IMAGE}@${d#*@}\`" >> "$GITHUB_STEP_SUMMARY"
