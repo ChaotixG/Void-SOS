@@ -22,16 +22,16 @@ jobs:
         run: docker build --pull -t "$IMAGE" images/aemu-postoffice
       - name: Starts, read-only, and answers on both ports
         run: |
-          docker run -d --name t --read-only --cap-drop ALL \
+          docker run -d --name aemu-check --read-only --cap-drop ALL \
             -p 127.0.0.1:27312:27312 -p 127.0.0.1:27313:27313 "$IMAGE"
           for i in $(seq 20); do
             (exec 3<>/dev/tcp/127.0.0.1/27312 && exec 4<>/dev/tcp/127.0.0.1/27313) 2>/dev/null && break
             sleep 1
           done
-          docker logs t
+          docker logs aemu-check
           exec 3<>/dev/tcp/127.0.0.1/27312 && exec 4<>/dev/tcp/127.0.0.1/27313
-          test "$(docker inspect -f '{{.State.Running}}' t)" = true
-          docker rm -f t
+          test "$(docker inspect -f '{{.State.Running}}' aemu-check)" = true
+          docker rm -f aemu-check
       - name: Publish
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
